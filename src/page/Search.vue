@@ -1,6 +1,6 @@
 <template>
   <div class="search">
-    <h2>用戶搜尋</h2>
+    <h2>用戶列表</h2>
     <div class="search-container">
       <div v-for="user in users" :key="user.id" class="card">
         <div class="card-item">
@@ -13,13 +13,13 @@
             </div>
 
             <div class="user-info">
-              <p class="name">{{ user.name }}</p>
+              <p class="name">{{ user.username }}</p>
               <p class="email">{{ user.email }}</p>
             </div>
           </div>
 
           <div>
-            <el-button plain>查看</el-button>
+            <el-button plain @click="handleClick(user.id)">查看</el-button>
           </div>
         </div>
 
@@ -32,12 +32,21 @@
 <script setup>
 import { useQuery } from "@tanstack/vue-query";
 import { getUserLists } from "../api/user";
-import { computed } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 const {
   data: users,
   isLoading,
   error,
 } = useQuery({ queryKey: ["users"], queryFn: getUserLists });
+
+function handleClick(userId) {
+  router.push({
+    name: "profile",
+    params: { userId },
+  });
+}
 </script>
 
 <style scoped>

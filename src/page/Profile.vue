@@ -1,14 +1,17 @@
 <template>
   <div class="profile">
     <h2>個人檔案</h2>
-    <div class="profile-container">
+    <div class="profile-container" v-if="!isLoading">
       <div class="user-info">
         <div>
           <h2>{{ user?.username ?? "" }}</h2>
           <p>{{ user?.email ?? "" }}</p>
         </div>
 
-        <el-avatar :size="60" :src="`https://i.pravatar.cc/300?img=${5}`" />
+        <el-avatar
+          :size="60"
+          :src="`https://i.pravatar.cc/300?img=${userId}`"
+        />
       </div>
 
       <el-divider></el-divider>
@@ -20,7 +23,7 @@
             <el-col class="post-header">
               <el-avatar
                 :size="50"
-                :src="`https://i.pravatar.cc/300?img=${5}`"
+                :src="`https://i.pravatar.cc/300?img=${userId}`"
               />
               <div class="user-info">
                 <span class="username">{{ user.username ?? "" }}</span>
@@ -44,15 +47,18 @@ import { getUser } from "../api/user";
 import { getUserPosts } from "../api/post";
 
 import { useQuery } from "@tanstack/vue-query";
+import { useRoute } from "vue-router";
 
-const { data: user } = useQuery({
+const route = useRoute();
+const { userId } = route.params;
+const { data: user, isLoading } = useQuery({
   queryKey: ["user"],
-  queryFn: () => getUser(5),
+  queryFn: () => getUser(userId),
 });
 
 const { data: userPost } = useQuery({
   queryKey: ["userPost"],
-  queryFn: () => getUserPosts(5),
+  queryFn: () => getUserPosts(userId),
 });
 </script>
 

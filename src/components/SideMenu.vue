@@ -3,15 +3,15 @@
   <!-- 左邊的菜單 -->
   <el-aside width="70px" class="menu-aside">
     <el-menu :default-active="activeMenu" class="menu" mode="vertical">
-      <el-menu-item index="/home" @click="navigate('/home')">
+      <el-menu-item index="home" @click="navigate('home')">
         <el-icon class="icon" :size="60"><HomeFilled /></el-icon>
         <!-- 房子圖案 -->
       </el-menu-item>
-      <el-menu-item index="/search" @click="navigate('/search')">
+      <el-menu-item index="search" @click="navigate('search')">
         <el-icon class="icon" :size="60"><Search /></el-icon>
         <!-- 放大鏡圖案 -->
       </el-menu-item>
-      <el-menu-item index="/profile" @click="navigate('/profile')">
+      <el-menu-item index="profile" @click="navigate('profile')">
         <el-icon class="icon" :size="60"><Avatar /></el-icon>
         <!-- 人像圖案 -->
       </el-menu-item>
@@ -29,12 +29,12 @@ import {
   Search,
 } from "@element-plus/icons-vue";
 
-const activeMenu = ref("/home");
+const activeMenu = ref("home");
 const router = useRouter();
 
-const navigate = (path) => {
-  activeMenu.value = path;
-  router.push(path); // 使用 Vue Router 來導航到指定頁面
+const navigate = (name) => {
+  activeMenu.value = name;
+  router.push({ name, params: { userId: 5 } }); // 使用 Vue Router 來導航到指定頁面
 };
 </script>
 
