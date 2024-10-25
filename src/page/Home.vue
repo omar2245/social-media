@@ -2,7 +2,7 @@
 <template>
   <el-col class="home">
     <h2>動態消息</h2>
-    <el-col class="posts">
+    <el-col class="posts" v-if="!isLoading">
       <el-col @click="dialogVisible = true" class="post-btn">
         <div class="fake-input">
           <el-avatar :size="40" :src="`https://i.pravatar.cc/300?img=5`" />
@@ -76,7 +76,6 @@ import { ElMessage } from "element-plus";
 const {
   data: posts,
   isLoading,
-
   error,
 } = useQuery({ queryKey: ["posts"], queryFn: () => getPosts() });
 const postsList = computed(() => {
