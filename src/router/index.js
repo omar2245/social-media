@@ -4,11 +4,17 @@ import Main from "../page/Main.vue";
 import Home from "../page/Home.vue";
 import Search from "../page/Search.vue";
 import Profile from "../page/Profile.vue";
+import Login from "../page/Login.vue";
+import Register from "../page/Register.vue";
+import PostDetail from "../page/PostDetail.vue";
+
 const routes = [
   {
     path: "/",
     redirect: "/home",
   },
+  { path: "/login", name: "Login", component: Login },
+  { path: "/register", name: "Register", component: Register },
   {
     path: "/",
     name: "Home",
@@ -25,7 +31,12 @@ const routes = [
         component: Search,
       },
       {
-        path: "profile/:userId",
+        path: "/posts/:id",
+        name: "PostDetail",
+        component: PostDetail,
+      },
+      {
+        path: "/profile/:id",
         name: "profile",
         component: Profile,
       },
