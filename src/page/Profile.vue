@@ -9,13 +9,20 @@
             <span>
               <el-button
                 class="follow_btn"
-                v-if="!isMe"
+                v-if="!isMe && me != null"
                 :type="isFollowed ? '' : 'primary'"
                 @click="toggleFollow"
               >
                 {{ isFollowed ? "取消追蹤" : "追蹤" }}
-              </el-button></span
-            >
+              </el-button>
+              <el-button
+                class="follow_btn"
+                v-if="isMe && me != null"
+                @click="goToEditProfile"
+              >
+                編輯個人檔案
+              </el-button>
+            </span>
           </h2>
           <p>{{ profileUser?.full_name ?? "" }}</p>
         </div>
@@ -229,6 +236,10 @@ const goToUser = (id) => {
   router.push(`/profile/${id}`);
   showFollowers.value = false;
   showFollowing.value = false;
+};
+
+const goToEditProfile = () => {
+  router.push(`/profile/edit`);
 };
 </script>
 

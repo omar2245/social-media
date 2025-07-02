@@ -97,7 +97,10 @@ api.interceptors.response.use(
       });
     }
 
-    ElMessage({ message: "網路錯誤", type: "error" });
+    ElMessage({
+      message: `${error?.response?.data?.message ?? "發生錯誤"}`,
+      type: "error",
+    });
     return Promise.reject(error);
   }
 );

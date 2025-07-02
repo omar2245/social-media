@@ -7,6 +7,7 @@ import Profile from "../page/Profile.vue";
 import Login from "../page/Login.vue";
 import Register from "../page/Register.vue";
 import PostDetail from "../page/PostDetail.vue";
+import EditProfile from "../page/EditProfile.vue";
 
 const routes = [
   {
@@ -32,13 +33,20 @@ const routes = [
       },
       {
         path: "/posts/:id",
-        name: "PostDetail",
+        name: "postDetail",
         component: PostDetail,
       },
       {
         path: "/profile/:id",
         name: "profile",
         component: Profile,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: "/profile/edit",
+        name: "editProfile",
+        component: EditProfile,
+        meta: { requiresAuth: true },
       },
     ],
   },
@@ -47,6 +55,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = !!localStorage.getItem("access_token");
+
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    next({ name: "login" });
+  } else {
+    next();
+  }
 });
 
 export default router;

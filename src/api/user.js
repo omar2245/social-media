@@ -16,6 +16,11 @@ export const getMe = async () => {
 
   return response.data.data;
 };
+export const updateMe = async (data) => {
+  const response = await api.put(`/user/me`, data);
+
+  return response.data.data;
+};
 
 export const getUserPosts = async (id) => {
   const response = await api.get(`/user/${id}/posts`);
