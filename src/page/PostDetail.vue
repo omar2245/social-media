@@ -51,10 +51,23 @@
     <div v-for="comment in comments" :key="comment.id" class="comment">
       <el-card class="comment-card">
         <div class="comment-header">
-          <strong>{{ comment.username }}</strong>
+          <div class="avatar">
+            <el-avatar :src="comment?.avatar" v-if="comment.avatar" />
+            <el-avatar
+              :size="40"
+              :style="{
+                backgroundColor: getColorFromChar(comment?.username[0]),
+              }"
+              v-else
+              >{{ comment?.username[0] || "-" }}</el-avatar
+            >
+            <strong>{{ comment.username }}</strong>
+          </div>
+
           <span class="date">{{ formatDate(comment.created_at) }}</span>
         </div>
-        <p>{{ comment.content }}</p>
+
+        <p class="comment-content">{{ comment.content }}</p>
       </el-card>
     </div>
   </div>
@@ -66,6 +79,7 @@ import { useRoute } from "vue-router";
 import { getPostDetail, getPostComments, createComment } from "../api/post";
 import { ElMessage } from "element-plus";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
+import { getColorFromChar } from "../utils/utils";
 
 const route = useRoute();
 const postId = route.params.id;
@@ -158,6 +172,14 @@ const formatDate = (iso) =>
   display: flex;
   justify-content: space-between;
   margin-bottom: 4px;
+  .avatar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+.comment-content {
+  padding-left: 48px;
 }
 .comment-form {
   gap: 12px;

@@ -26,13 +26,18 @@
           </h2>
           <p>{{ profileUser?.full_name ?? "" }}</p>
         </div>
-
+        <el-avatar
+          :src="profileUser?.avatar"
+          :size="60"
+          v-if="profileUser.avatar"
+        />
         <el-avatar
           :size="60"
           :style="{
             backgroundColor: getColorFromChar(profileUser?.username[0]),
           }"
-          >{{ profileUser?.username[0] ?? "-" }}</el-avatar
+          v-else
+          >{{ profileUser?.username[0] || "-" }}</el-avatar
         >
       </div>
       <p class="desc">{{ profileUser?.desc ?? "" }}</p>
@@ -57,12 +62,14 @@
         >
           <div class="post">
             <el-col class="post-header">
+              <el-avatar :src="post?.avatar" v-if="post.avatar" />
               <el-avatar
                 :size="40"
                 :style="{
                   backgroundColor: getColorFromChar(post?.username[0]),
                 }"
-                >{{ post.username[0] }}</el-avatar
+                v-else
+                >{{ post?.username[0] || "-" }}</el-avatar
               >
               <div class="user-info">
                 <span class="username">{{ post.username ?? "-" }}</span>
@@ -90,10 +97,14 @@
       justify="space-between"
     >
       <div class="user-info" @click="goToUser(user.id)">
+        <el-avatar :src="user?.avatar" v-if="user.avatar" />
         <el-avatar
-          size="40"
-          :style="{ backgroundColor: getColorFromChar(user?.username[0]) }"
-          >{{ user.username[0] }}</el-avatar
+          :size="40"
+          :style="{
+            backgroundColor: getColorFromChar(user?.username[0]),
+          }"
+          v-else
+          >{{ user?.username[0] || "-" }}</el-avatar
         >
         <div class="user-text">
           <div class="username">{{ user.username }}</div>
@@ -114,10 +125,14 @@
       justify="space-between"
     >
       <div class="user-info" @click="goToUser(user.id)">
+        <el-avatar :src="user?.avatar" v-if="user.avatar" />
         <el-avatar
-          size="40"
-          :style="{ backgroundColor: getColorFromChar(user?.username[0]) }"
-          >{{ user.username[0] }}</el-avatar
+          :size="40"
+          :style="{
+            backgroundColor: getColorFromChar(user?.username[0]),
+          }"
+          v-else
+          >{{ user?.username[0] || "-" }}</el-avatar
         >
         <div class="user-text">
           <div class="username">{{ user.username || "-" }}</div>
@@ -224,6 +239,19 @@ const toggleFollow = async () => {
     }
 
     isFollowed.value = !isFollowed.value;
+    followStat.value = await getUserFollowStat(profileUserId.value);
+    following.value = await getUserFollowing(profileUserId.value);
+    followers.value = await getUserFollower(profileUserId.value);
+  } catch (e) {
+    ElMessage.error("操作失敗");
+  }
+};
+
+const onUnfollow = async (id) => {
+  try {
+    await unfollowUser(id);
+    ElMessage.success("退追蹤成功");
+
     followStat.value = await getUserFollowStat(profileUserId.value);
     following.value = await getUserFollowing(profileUserId.value);
     followers.value = await getUserFollower(profileUserId.value);

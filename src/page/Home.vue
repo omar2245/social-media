@@ -32,12 +32,14 @@
       <div class="post-card" v-for="(post, index) in postsList" :key="post.id">
         <div class="post">
           <el-col class="post-header" @click="goToUser(post.user_id)">
+            <el-avatar :src="post?.avatar" v-if="post.avatar" />
             <el-avatar
               :size="40"
               :style="{
                 backgroundColor: getColorFromChar(post?.username[0]),
               }"
-              >{{ post?.username[0] ?? "-" }}</el-avatar
+              v-else
+              >{{ post?.username[0] || "-" }}</el-avatar
             >
             <div class="user-info">
               <span class="username">{{ post.username ?? "-" }}</span>

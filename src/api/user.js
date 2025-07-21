@@ -62,3 +62,12 @@ export const isFollowingUser = async (id) => {
 
   return response.data.data;
 };
+
+export const uploadAvatar = async (formData) => {
+  const response = await api.post(`/user/me/upload_avatar`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data.data;
+};

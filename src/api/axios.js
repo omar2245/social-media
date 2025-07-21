@@ -2,11 +2,11 @@ import axios from "axios";
 import { startLoading, endLoading } from "../utils/loading";
 import { ElMessage } from "element-plus";
 export const authApi = axios.create({
-  baseURL: "http://127.0.0.1:5000/api/v1/auth",
+  baseURL: `${import.meta.env.VITE_API_URL}/api/v1/auth`,
 });
 
 const api = axios.create({
-  baseURL: "http://127.0.0.1:5000/api/v1",
+  baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
 });
 
 let isRefreshing = false;
@@ -23,7 +23,7 @@ const refreshAccessToken = async () => {
 
   try {
     const response = await axios.post(
-      "http://127.0.0.1:5000/api/v1/auth/refresh",
+      `${import.meta.env.VITE_API_URL}/api/v1/auth/refresh`,
       {},
       {
         headers: {

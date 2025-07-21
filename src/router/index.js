@@ -61,7 +61,7 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = !!localStorage.getItem("access_token");
 
   if (to.meta.requiresAuth && !isLoggedIn) {
-    next({ name: "login" });
+    next({ name: "Login" });
   } else {
     next();
   }
