@@ -2,7 +2,15 @@
   <div class="post-detail">
     <el-card v-if="post">
       <div class="header">
-        <el-avatar :size="40">{{ post.username[0] }}</el-avatar>
+        <el-avatar :src="post?.avatar" v-if="post.avatar" />
+        <el-avatar
+          :size="40"
+          :style="{
+            backgroundColor: getColorFromChar(post?.username[0]),
+          }"
+          v-else
+          >{{ post?.username[0] || "-" }}</el-avatar
+        >
         <div class="user-info">
           <p class="username">{{ post.username }}</p>
           <p class="date">{{ formatDate(post.created_at) }}</p>
@@ -11,17 +19,27 @@
 
       <p class="content">{{ post.content }}</p>
 
+      <div class="post-images" v-if="post.images && post.images.length">
+        <div
+          v-for="(imgUrl, idx) in post.images"
+          :key="idx"
+          class="post-image-wrapper"
+        >
+          <img :src="imgUrl" alt="Post Image" class="post-image" />
+        </div>
+      </div>
+
       <div class="post-actions">
         <span class="action" @click="onLike(post)">
           <i
             :class="[post.is_liked ? 'fas fa-heart liked' : 'far fa-heart']"
           ></i>
-          {{ post.likes > 0 ? post.likes : "" }}
+          {{ post.likes > 0 ? post.likes : "0" }}
         </span>
 
         <span class="action">
           <i class="far fa-comment"></i>
-          {{ post.comment_count > 0 ? post.comment_count : "" }}
+          {{ post.comment_count > 0 ? post.comment_count : "0" }}
         </span>
       </div>
     </el-card>
@@ -207,5 +225,30 @@ const formatDate = (iso) =>
 
 .fa-heart.liked {
   color: red;
+}
+
+.post-images {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.post-image-wrapper {
+  width: 200px;
+  height: 200px;
+  background-color: white; /* 白底 */
+  border-radius: 8px; /* 可選，圓角 */
+  overflow: hidden; /* 超出區域隱藏 */
+  flex-shrink: 0; /* 避免縮小 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 圖片裁切填滿 */
+  display: block;
 }
 </style>

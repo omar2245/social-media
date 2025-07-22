@@ -13,15 +13,17 @@
       </div>
     </div>
 
-    <el-col class="posts">
+    <div class="posts">
       <el-col @click="dialogVisible = true" class="post-btn">
         <div class="fake-input">
+          <el-avatar :src="user?.avatar" v-if="user?.avatar" />
           <el-avatar
             :size="40"
             :style="{
               backgroundColor: getColorFromChar(user?.username[0]),
             }"
-            >{{ user?.username[0] ?? "-" }}</el-avatar
+            v-else
+            >{{ user?.username[0] || "-" }}</el-avatar
           >
           <p class="placeholder">有什麼新鮮事?</p>
         </div>
@@ -31,7 +33,7 @@
 
       <div class="post-card" v-for="(post, index) in postsList" :key="post.id">
         <div class="post">
-          <el-col class="post-header" @click="goToUser(post.user_id)">
+          <div @click="goToUser(post.user_id)">
             <el-avatar :src="post?.avatar" v-if="post.avatar" />
             <el-avatar
               :size="40"
@@ -41,31 +43,50 @@
               v-else
               >{{ post?.username[0] || "-" }}</el-avatar
             >
-            <div class="user-info">
-              <span class="username">{{ post.username ?? "-" }}</span>
-            </div>
-          </el-col>
-          <div class="post-content" @click="goToPost(post.id)">
-            <p>{{ post.content }}</p>
           </div>
-          <div class="post-actions">
-            <span class="action" @click="onLike(post)">
-              <i
-                :class="[post.is_liked ? 'fas fa-heart liked' : 'far fa-heart']"
-              ></i>
-              {{ post.likes > 0 ? post.likes : "" }}
-            </span>
-            <span class="action" @click="goToPost(post.id)">
-              <i class="far fa-comment"></i>
-              {{ post.comment_count > 0 ? post.comment_count : "" }}
-            </span>
+          <div>
+            <el-col class="post-detail">
+              <div class="user-info" @click="goToUser(post.user_id)">
+                <span class="username">{{ post.username ?? "-" }}</span>
+              </div>
+
+              <div class="post-content" @click="goToPost(post.id)">
+                {{ post.content }}
+              </div>
+
+              <!-- 圖片列表 -->
+              <div class="post-images" v-if="post.images && post.images.length">
+                <div
+                  v-for="(imgUrl, idx) in post.images"
+                  :key="idx"
+                  class="post-image-wrapper"
+                >
+                  <img :src="imgUrl" alt="Post Image" class="post-image" />
+                </div>
+              </div>
+
+              <div class="post-actions">
+                <span class="action" @click="onLike(post)">
+                  <i
+                    :class="[
+                      post.is_liked ? 'fas fa-heart liked' : 'far fa-heart',
+                    ]"
+                  ></i>
+                  {{ post.likes > 0 ? post.likes : "0" }}
+                </span>
+                <span class="action" @click="goToPost(post.id)">
+                  <i class="far fa-comment"></i>
+                  {{ post.comment_count > 0 ? post.comment_count : "0" }}
+                </span>
+              </div>
+            </el-col>
           </div>
         </div>
         <el-divider class="divider"></el-divider>
       </div>
 
       <el-alert v-if="error" type="error" title="加載錯誤" />
-    </el-col>
+    </div>
     <el-button
       v-if="hasNextPage && !isFetchingNextPage"
       class="load-more-btn"
@@ -203,11 +224,9 @@ const goToUser = (id) => {
   background-color: #2e2e2e;
 }
 .post-card {
-  margin-bottom: 20px;
-}
-.post {
   padding: 20px;
 }
+
 .dialog-input {
   border: none;
   outline: none;
@@ -216,9 +235,7 @@ const goToUser = (id) => {
   background-color: #2e2e2e;
   color: white;
 }
-.post-header {
-  display: flex;
-  align-items: center;
+.post-detail {
   margin-bottom: 10px;
   cursor: pointer;
 }
@@ -226,8 +243,7 @@ const goToUser = (id) => {
   margin-right: 12px;
 }
 .user-info {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 4px;
 }
 .username {
   font-size: 16px;
@@ -247,20 +263,46 @@ const goToUser = (id) => {
 .placeholder {
   opacity: 60%;
 }
+
+.post {
+  display: flex;
+  gap: 4px;
+}
 .post-content {
-  margin-top: 4px;
-  padding-left: 52px;
+  margin-bottom: 4px;
   cursor: pointer;
 }
 .el-divider {
   margin: 10px 0;
   border-color: rgba(243, 245, 247, 0.15) !important;
 }
+.post-images {
+  display: flex;
+  gap: 16px;
+}
+
+.post-image-wrapper {
+  width: 200px;
+  height: 200px;
+  background-color: white; /* 白底 */
+  border-radius: 8px; /* 可選，圓角 */
+  overflow: hidden; /* 超出區域隱藏 */
+  flex-shrink: 0; /* 避免縮小 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 圖片裁切填滿 */
+  display: block;
+}
 .post-actions {
-  padding-left: 52px;
   display: flex;
   gap: 24px;
-  margin-top: 16px;
+  margin-top: 8px;
   font-size: 16px;
   color: #b4b4b4;
 }

@@ -61,7 +61,7 @@
           :key="post.id"
         >
           <div class="post">
-            <el-col class="post-header">
+            <div @click="goToUser(post.user_id)">
               <el-avatar :src="post?.avatar" v-if="post.avatar" />
               <el-avatar
                 :size="40"
@@ -71,14 +71,31 @@
                 v-else
                 >{{ post?.username[0] || "-" }}</el-avatar
               >
-              <div class="user-info">
-                <span class="username">{{ post.username ?? "-" }}</span>
-                <!-- 顯示使用者名稱 -->
-              </div>
-            </el-col>
-            <div class="post-content">
-              <!-- <h3>{{ post.title }}</h3> -->
-              <p>{{ post.content }}</p>
+            </div>
+            <div>
+              <el-col class="post-detail">
+                <div class="user-info" @click="goToUser(post.user_id)">
+                  <span class="username">{{ post.username ?? "-" }}</span>
+                </div>
+
+                <div class="post-content" @click="goToPost(post.id)">
+                  {{ post.content }}
+                </div>
+
+                <!-- 圖片列表 -->
+                <div
+                  class="post-images"
+                  v-if="post.images && post.images.length"
+                >
+                  <div
+                    v-for="(imgUrl, idx) in post.images"
+                    :key="idx"
+                    class="post-image-wrapper"
+                  >
+                    <img :src="imgUrl" alt="Post Image" class="post-image" />
+                  </div>
+                </div>
+              </el-col>
             </div>
           </div>
           <el-divider class="divider"></el-divider>
@@ -312,8 +329,10 @@ const goToEditProfile = () => {
   margin-top: 40px;
 }
 .post-card {
+  margin-top: 24px;
   .post {
-    padding-top: 12px;
+    display: flex;
+    gap: 4px;
   }
 }
 
@@ -321,10 +340,9 @@ const goToEditProfile = () => {
   background-color: #2e2e2e; /* Dark background */
   color: white;
 }
-.post-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+.post-content {
+  margin-bottom: 4px;
+  cursor: pointer;
 }
 
 .el-avatar {
@@ -344,10 +362,6 @@ const goToEditProfile = () => {
   font-weight: bold;
 }
 
-.post-content {
-  margin-top: 10px;
-  padding-left: 52px;
-}
 .follow-stat {
   display: flex;
   gap: 12px;
@@ -385,5 +399,29 @@ const goToEditProfile = () => {
   .follow_btn {
     padding-left: 80px;
   }
+}
+
+.post-images {
+  display: flex;
+  gap: 16px;
+}
+
+.post-image-wrapper {
+  width: 200px;
+  height: 200px;
+  background-color: white; /* 白底 */
+  border-radius: 8px; /* 可選，圓角 */
+  overflow: hidden; /* 超出區域隱藏 */
+  flex-shrink: 0; /* 避免縮小 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 圖片裁切填滿 */
+  display: block;
 }
 </style>
