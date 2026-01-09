@@ -28,8 +28,8 @@ import { authApi } from "../api/axios";
 const router = useRouter();
 const formRef = ref();
 const form = reactive({
-  username: "", // 可以是 email 或 username
-  password: "",
+  username: "test", // 可以是 email 或 username
+  password: "omar1231",
 });
 
 const rules = {
