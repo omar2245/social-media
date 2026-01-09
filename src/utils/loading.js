@@ -2,6 +2,7 @@ import { ElLoading, ElMessage } from "element-plus";
 
 let loadingInstance;
 let slowLoadingTimer;
+let autoCloseTimer;
 
 const startLoading = (text = "載入中") => {
   loadingInstance = ElLoading.service({
@@ -22,10 +23,19 @@ const startLoading = (text = "載入中") => {
       }
     }
   }, 3000);
+
+  // 3 秒後自動關閉 loading
+  autoCloseTimer = setTimeout(() => {
+    if (loadingInstance) {
+      loadingInstance.close();
+      loadingInstance = null;
+    }
+  }, 3000);
 };
 
 const endLoading = () => {
   clearTimeout(slowLoadingTimer);
+  clearTimeout(autoCloseTimer);
   if (loadingInstance) {
     loadingInstance.close();
     loadingInstance = null;
