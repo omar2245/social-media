@@ -8,7 +8,7 @@
       label-width="100px"
       class="edit-form"
     >
-      <el-form-item label="使用者圖片">
+      <!-- <el-form-item label="使用者圖片">
         <div class="upload-avatar">
           <input
             type="file"
@@ -34,7 +34,7 @@
             上傳圖片
           </el-button>
         </div>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="使用者名稱">
         <el-input v-model="form.username" />
       </el-form-item>

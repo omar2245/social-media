@@ -103,13 +103,41 @@
         v-model="form.content"
         placeholder="有什麼新鮮事?"
         type="textarea"
-      ></el-input>
+      />
+
+      <!-- 圖片預覽 -->
+      <div class="preview-images" v-if="previewImages.length">
+        <div
+          class="preview-item"
+          v-for="(img, idx) in previewImages"
+          :key="idx"
+        >
+          <img :src="img" class="preview-img" />
+          <span class="remove" @click="removeImage(idx)">×</span>
+        </div>
+      </div>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="onSubmit" :disabled="form.content.length === 0"
-          >發佈</el-button
-        >
+        <!-- 上傳圖片按鈕 -->
+        <!-- <el-button class="upload-btn" @click="triggerFileInput"
+          >選擇圖片</el-button
+        > -->
+        <input
+          type="file"
+          ref="fileInput"
+          multiple
+          accept="image/*"
+          style="display: none"
+          @change="handleFiles"
+        />
+        <el-button
+          @click="onSubmit"
+          :disabled="form.content.length === 0"
+          type="primary"
+          :loading="isSubmitting"
+          >發佈
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -133,7 +161,11 @@ const router = useRouter();
 const queryClient = useQueryClient();
 
 const dialogVisible = ref(false);
-const form = reactive({ content: "" });
+
+const form = reactive({ content: "", files: [] });
+const isSubmitting = ref(false);
+const fileInput = ref(null); // 參考 file input
+const previewImages = ref([]); // 預覽用 URL
 
 // 使用者資料
 const { data: user, isLoading: isUserLoading } = useQuery({
@@ -145,18 +177,63 @@ const { data: user, isLoading: isUserLoading } = useQuery({
 const createPostMutation = useMutation({
   mutationFn: createPost,
   onSuccess: () => {
-    ElMessage({ message: "發佈貼文成功", type: "success" });
     dialogVisible.value = false;
     form.content = "";
     queryClient.invalidateQueries({ queryKey: ["posts"] });
   },
 });
 
+// 觸發隱藏 input
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+// 選擇圖片
+const handleFiles = (event) => {
+  const files = Array.from(event.target.files);
+  console.log(event.target.files);
+  // 限制最多 5 張
+  if (form.files.length + files.length > 2) {
+    ElMessage.warning("最多只能上傳 2 張圖片");
+    return;
+  }
+
+  files.forEach((file) => {
+    form.files.push(file);
+    previewImages.value.push(URL.createObjectURL(file));
+  });
+
+  // 清空 input value，避免同一張圖片無法重複選擇
+  event.target.value = "";
+};
+
+// 移除單張圖片
+const removeImage = (index) => {
+  form.files.splice(index, 1);
+  previewImages.value.splice(index, 1);
+};
+
 const onSubmit = async () => {
+  isSubmitting.value = true;
   try {
-    await createPostMutation.mutateAsync(form);
+    const formData = new FormData();
+    formData.append("content", form.content);
+
+    form.files.forEach((file) => {
+      formData.append("images", file);
+    });
+
+    await createPostMutation.mutateAsync(formData);
+    ElMessage.success("發佈成功");
+
+    // 清空表單
+    form.content = "";
+    form.files = [];
+    previewImages.value = [];
   } catch (e) {
-    ElMessage({ message: "發佈失敗", type: "error" });
+    ElMessage.error("發佈失敗");
+  } finally {
+    isSubmitting.value = false;
   }
 };
 
@@ -325,5 +402,45 @@ const goToUser = (id) => {
 }
 .load-more-btn {
   margin-top: 24px;
+}
+
+.preview-images {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.preview-item {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 100%;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 </style>

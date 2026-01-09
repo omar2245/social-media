@@ -58,7 +58,11 @@ const onLogin = () => {
       ElMessage.success("登入成功");
       router.push("/home"); // 登入後導向主頁
     } catch (err) {
-      ElMessage.error(err.response?.data?.message || "登入失敗");
+      ElMessage.error(
+        err.response?.data?.error === "Invalid credentials"
+          ? "帳號或密碼輸入錯誤"
+          : err.response?.data?.error || "登入失敗"
+      );
     }
   });
 };

@@ -61,7 +61,7 @@
           :key="post.id"
         >
           <div class="post">
-            <div @click="goToUser(post.user_id)">
+            <div>
               <el-avatar :src="post?.avatar" v-if="post.avatar" />
               <el-avatar
                 :size="40"
@@ -72,30 +72,29 @@
                 >{{ post?.username[0] || "-" }}</el-avatar
               >
             </div>
-            <div>
-              <el-col class="post-detail">
-                <div class="user-info" @click="goToUser(post.user_id)">
-                  <span class="username">{{ post.username ?? "-" }}</span>
-                </div>
 
-                <div class="post-content" @click="goToPost(post.id)">
-                  {{ post.content }}
-                </div>
+            <div class="post-detail">
+              <div class="post-user-info">
+                <span class="username">{{ post.username ?? "-" }}</span>
+                <span class="delete-action" @click="confirmDelete(post.id)">
+                  <i class="fas fa-trash"></i>
+                </span>
+              </div>
 
-                <!-- 圖片列表 -->
+              <div class="post-content" @click="goToPost(post.id)">
+                {{ post.content }}
+              </div>
+
+              <!-- 圖片列表 -->
+              <div class="post-images" v-if="post.images && post.images.length">
                 <div
-                  class="post-images"
-                  v-if="post.images && post.images.length"
+                  v-for="(imgUrl, idx) in post.images"
+                  :key="idx"
+                  class="post-image-wrapper"
                 >
-                  <div
-                    v-for="(imgUrl, idx) in post.images"
-                    :key="idx"
-                    class="post-image-wrapper"
-                  >
-                    <img :src="imgUrl" alt="Post Image" class="post-image" />
-                  </div>
+                  <img :src="imgUrl" alt="Post Image" class="post-image" />
                 </div>
-              </el-col>
+              </div>
             </div>
           </div>
           <el-divider class="divider"></el-divider>
@@ -165,8 +164,8 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import { useRoute, useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
-
+import { ElMessageBox, ElMessage } from "element-plus";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
 // API
 import {
   getMe,
@@ -179,6 +178,8 @@ import {
   unfollowUser,
   isFollowingUser,
 } from "../api/user";
+
+import { deletePost } from "../api/post";
 import { endLoading, startLoading } from "../utils/loading";
 import { getColorFromChar } from "../utils/utils";
 // route 與 router
@@ -207,6 +208,16 @@ const showFollowing = ref(false);
 const isPostLoading = ref(false);
 const isUserLoading = ref(true);
 
+// 刪除貼文
+const queryClient = useQueryClient();
+
+const deleteMutation = useMutation({
+  mutationFn: deletePost,
+  onSuccess: () => {
+    ElMessage.success("貼文已刪除");
+    loadProfileData(); // 重新抓取貼文
+  },
+});
 const loadProfileData = async () => {
   isUserLoading.value = true;
   isPostLoading.value = true;
@@ -244,6 +255,21 @@ watch(profileUserId, () => {
 });
 
 const isMe = computed(() => me.value?.id === profileUserId.value);
+
+// 彈出確認框
+const confirmDelete = (postId) => {
+  ElMessageBox.confirm("確定要刪除此貼文嗎？此動作無法復原。", "刪除確認", {
+    confirmButtonText: "刪除",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(() => {
+      deleteMutation.mutate(postId);
+    })
+    .catch(() => {
+      // 使用者取消，不做任何事
+    });
+};
 
 const toggleFollow = async () => {
   try {
@@ -330,8 +356,10 @@ const goToEditProfile = () => {
 }
 .post-card {
   margin-top: 24px;
+
   .post {
     display: flex;
+    min-width: 100%;
     gap: 4px;
   }
 }
@@ -339,10 +367,6 @@ const goToEditProfile = () => {
 .el-card {
   background-color: #2e2e2e; /* Dark background */
   color: white;
-}
-.post-content {
-  margin-bottom: 4px;
-  cursor: pointer;
 }
 
 .el-avatar {
@@ -355,6 +379,8 @@ const goToEditProfile = () => {
 }
 
 .post-content {
+  margin-bottom: 4px;
+  cursor: pointer;
   margin-top: 10px;
 }
 .username {
@@ -423,5 +449,27 @@ const goToEditProfile = () => {
   height: 100%;
   object-fit: cover; /* 圖片裁切填滿 */
   display: block;
+}
+.post-user-info {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 100%;
+}
+
+.delete-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* 圓形 */
+  color: #7a7a7a; /* 垃圾桶圖示顏色灰色 */
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.delete-action:hover {
+  border: 1px solid #e0e0e0;
 }
 </style>

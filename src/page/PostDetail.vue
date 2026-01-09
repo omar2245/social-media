@@ -94,7 +94,13 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
-import { getPostDetail, getPostComments, createComment } from "../api/post";
+import {
+  getPostDetail,
+  getPostComments,
+  createComment,
+  like,
+  dislike,
+} from "../api/post";
 import { ElMessage } from "element-plus";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { getColorFromChar } from "../utils/utils";
@@ -145,6 +151,19 @@ const formatDate = (iso) =>
     dateStyle: "short",
     timeStyle: "short",
   });
+
+const onLike = async (post) => {
+  try {
+    if (!post.is_liked) {
+      await like(post.id);
+    } else {
+      await dislike(post.id);
+    }
+    queryClient.invalidateQueries({ queryKey: ["post", postId] });
+  } catch (e) {
+    ElMessage({ message: "操作失敗", type: "error" });
+  }
+};
 </script>
 
 <style scoped>

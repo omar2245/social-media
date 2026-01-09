@@ -35,11 +35,22 @@ const form = reactive({
   email: "",
   password: "",
 });
-
+const validatePassword = (rule, value, callback) => {
+  if (!value) {
+    return callback("請輸入密碼");
+  }
+  if (value.length < 8) {
+    return callback("密碼需至少 8 個字元");
+  }
+  if (!/[A-Za-z]/.test(value) || !/[0-9]/.test(value)) {
+    return callback("密碼需包含英文與數字");
+  }
+  return callback();
+};
 const rules = {
   username: [{ required: true, message: "請輸入使用者名稱", trigger: "blur" }],
   email: [{ required: true, message: "請輸入電子信箱", trigger: "blur" }],
-  password: [{ required: true, message: "請輸入密碼", trigger: "blur" }],
+  password: [{ required: true, message: validatePassword, trigger: "blur" }],
 };
 
 const onRegister = () => {
@@ -51,7 +62,13 @@ const onRegister = () => {
       ElMessage.success("Register success!");
       router.push("/login");
     } catch (err) {
-      ElMessage.error(err.response?.data?.message || "Register failed");
+      console.log(err);
+      ElMessage.error(
+        err.response?.data?.error ===
+          "Password must contain both letters and numbers"
+          ? "Password must be at least 8 characters long and include both letters and numbers."
+          : err.response?.data?.error || "Register failed"
+      );
     }
   });
 };

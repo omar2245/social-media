@@ -6,9 +6,17 @@ export const getPosts = async (page = 1, limit = 10) => {
   return response.data.data;
 };
 
-export const createPost = async (data) => {
-  const response = await api.post(`/posts`, data);
+export const createPost = async (formData) => {
+  const response = await api.post(`/posts`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
 
+export const deletePost = async (postId) => {
+  const response = await api.delete(`/posts/${postId}`);
   return response.data;
 };
 
