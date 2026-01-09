@@ -22,7 +22,7 @@
           <div class="skeleton-button"></div>
         </div>
         <div class="skeleton-divider"></div>
-        
+
         <div v-for="i in 3" :key="`skeleton-${i}`" class="skeleton-post-card">
           <div class="skeleton-header">
             <div class="skeleton-avatar"></div>
@@ -32,7 +32,10 @@
             </div>
           </div>
           <div class="skeleton-content"></div>
-          <div class="skeleton-content" style="margin-top: 8px; width: 70%;"></div>
+          <div
+            class="skeleton-content"
+            style="margin-top: 8px; width: 70%"
+          ></div>
           <div class="skeleton-actions"></div>
         </div>
       </div>
@@ -56,58 +59,65 @@
         </el-col>
         <el-divider class="divider"></el-divider>
 
-        <div class="post-card" v-for="(post, index) in postsList" :key="post.id">
-        <div class="post">
-          <div @click="goToUser(post.user_id)">
-            <el-avatar :src="post?.avatar" v-if="post.avatar" />
-            <el-avatar
-              :size="40"
-              :style="{
-                backgroundColor: getColorFromChar(post?.username[0]),
-              }"
-              v-else
-              >{{ post?.username[0] || "-" }}</el-avatar
-            >
-          </div>
-          <div>
-            <el-col class="post-detail">
-              <div class="user-info" @click="goToUser(post.user_id)">
-                <span class="username">{{ post.username ?? "-" }}</span>
-              </div>
-
-              <div class="post-content" @click="goToPost(post.id)">
-                {{ post.content }}
-              </div>
-
-              <!-- 圖片列表 -->
-              <div class="post-images" v-if="post.images && post.images.length">
-                <div
-                  v-for="(imgUrl, idx) in post.images"
-                  :key="idx"
-                  class="post-image-wrapper"
-                >
-                  <img :src="imgUrl" alt="Post Image" class="post-image" />
+        <div
+          class="post-card"
+          v-for="(post, index) in postsList"
+          :key="post.id"
+        >
+          <div class="post">
+            <div @click="goToUser(post.user_id)">
+              <el-avatar :src="post?.avatar" v-if="post.avatar" />
+              <el-avatar
+                :size="40"
+                :style="{
+                  backgroundColor: getColorFromChar(post?.username[0]),
+                }"
+                v-else
+                >{{ post?.username[0] || "-" }}</el-avatar
+              >
+            </div>
+            <div>
+              <el-col class="post-detail">
+                <div class="user-info" @click="goToUser(post.user_id)">
+                  <span class="username">{{ post.username ?? "-" }}</span>
                 </div>
-              </div>
 
-              <div class="post-actions">
-                <span class="action" @click="onLike(post)">
-                  <i
-                    :class="[
-                      post.is_liked ? 'fas fa-heart liked' : 'far fa-heart',
-                    ]"
-                  ></i>
-                  {{ post.likes > 0 ? post.likes : "0" }}
-                </span>
-                <span class="action" @click="goToPost(post.id)">
-                  <i class="far fa-comment"></i>
-                  {{ post.comment_count > 0 ? post.comment_count : "0" }}
-                </span>
-              </div>
-            </el-col>
+                <div class="post-content" @click="goToPost(post.id)">
+                  {{ post.content }}
+                </div>
+
+                <!-- 圖片列表 -->
+                <div
+                  class="post-images"
+                  v-if="post.images && post.images.length"
+                >
+                  <div
+                    v-for="(imgUrl, idx) in post.images"
+                    :key="idx"
+                    class="post-image-wrapper"
+                  >
+                    <img :src="imgUrl" alt="Post Image" class="post-image" />
+                  </div>
+                </div>
+
+                <div class="post-actions">
+                  <span class="action" @click="onLike(post)">
+                    <i
+                      :class="[
+                        post.is_liked ? 'fas fa-heart liked' : 'far fa-heart',
+                      ]"
+                    ></i>
+                    {{ post.likes > 0 ? post.likes : "0" }}
+                  </span>
+                  <span class="action" @click="goToPost(post.id)">
+                    <i class="far fa-comment"></i>
+                    {{ post.comment_count > 0 ? post.comment_count : "0" }}
+                  </span>
+                </div>
+              </el-col>
+            </div>
           </div>
-        </div>
-        <el-divider class="divider"></el-divider>
+          <el-divider class="divider"></el-divider>
         </div>
       </template>
 
@@ -122,7 +132,10 @@
             </div>
           </div>
           <div class="skeleton-content"></div>
-          <div class="skeleton-content" style="margin-top: 8px; width: 70%;"></div>
+          <div
+            class="skeleton-content"
+            style="margin-top: 8px; width: 70%"
+          ></div>
           <div class="skeleton-actions"></div>
         </div>
       </div>
