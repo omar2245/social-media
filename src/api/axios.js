@@ -1,18 +1,20 @@
 import axios from "axios";
 import { startLoading, endLoading } from "../utils/loading";
 import { ElMessage } from "element-plus";
+
 export const authApi = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/v1/auth`,
+  timeout: 30000, // 30秒超時
 });
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
+  timeout: 30000, // 30秒超時
 });
 
 let isRefreshing = false;
 let pendingRequests = [];
-
-// 讀取 access token
+let slowRequestTimer;
 const getAccessToken = () => localStorage.getItem("access_token");
 const getRefreshToken = () => localStorage.getItem("refresh_token");
 
@@ -47,9 +49,20 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // 5秒後顯示超時警告
+    slowRequestTimer = setTimeout(() => {
+      ElMessage({
+        message: "伺服器回應較慢，請耐心等待...",
+        type: "warning",
+        duration: 0,
+        showClose: true,
+      });
+    }, 5000);
+
     return config;
   },
   function (error) {
+    clearTimeout(slowRequestTimer);
     return Promise.reject(error);
   }
 );
@@ -57,9 +70,11 @@ api.interceptors.request.use(
 // 處理錯誤與自動刷新
 api.interceptors.response.use(
   function (response) {
+    clearTimeout(slowRequestTimer);
     return response;
   },
   async function (error) {
+    clearTimeout(slowRequestTimer);
     const originalRequest = error.config;
     const status = error.response?.status;
 

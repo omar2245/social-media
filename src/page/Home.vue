@@ -14,24 +14,49 @@
     </div>
 
     <div class="posts">
-      <el-col @click="dialogVisible = true" class="post-btn">
-        <div class="fake-input">
-          <el-avatar :src="user?.avatar" v-if="user?.avatar" />
-          <el-avatar
-            :size="40"
-            :style="{
-              backgroundColor: getColorFromChar(user?.username[0]),
-            }"
-            v-else
-            >{{ user?.username[0] || "-" }}</el-avatar
-          >
-          <p class="placeholder">有什麼新鮮事?</p>
+      <!-- 初始加載骨架屏 -->
+      <div v-if="isUserLoading" class="skeleton-container">
+        <div class="skeleton-post-btn">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-input"></div>
+          <div class="skeleton-button"></div>
         </div>
-        <el-button @click="dialogVisible = true" plain>發佈</el-button>
-      </el-col>
-      <el-divider class="divider"></el-divider>
+        <div class="skeleton-divider"></div>
+        
+        <div v-for="i in 3" :key="`skeleton-${i}`" class="skeleton-post-card">
+          <div class="skeleton-header">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-info">
+              <div class="skeleton-name"></div>
+              <div class="skeleton-time"></div>
+            </div>
+          </div>
+          <div class="skeleton-content"></div>
+          <div class="skeleton-content" style="margin-top: 8px; width: 70%;"></div>
+          <div class="skeleton-actions"></div>
+        </div>
+      </div>
 
-      <div class="post-card" v-for="(post, index) in postsList" :key="post.id">
+      <!-- 實際內容 -->
+      <template v-else>
+        <el-col @click="dialogVisible = true" class="post-btn">
+          <div class="fake-input">
+            <el-avatar :src="user?.avatar" v-if="user?.avatar" />
+            <el-avatar
+              :size="40"
+              :style="{
+                backgroundColor: getColorFromChar(user?.username[0]),
+              }"
+              v-else
+              >{{ user?.username[0] || "-" }}</el-avatar
+            >
+            <p class="placeholder">有什麼新鮮事?</p>
+          </div>
+          <el-button @click="dialogVisible = true" plain>發佈</el-button>
+        </el-col>
+        <el-divider class="divider"></el-divider>
+
+        <div class="post-card" v-for="(post, index) in postsList" :key="post.id">
         <div class="post">
           <div @click="goToUser(post.user_id)">
             <el-avatar :src="post?.avatar" v-if="post.avatar" />
@@ -83,6 +108,23 @@
           </div>
         </div>
         <el-divider class="divider"></el-divider>
+        </div>
+      </template>
+
+      <!-- 下一頁加載中的骨架屏 -->
+      <div v-if="isFetchingNextPage" class="skeleton-container">
+        <div v-for="i in 3" :key="`loading-${i}`" class="skeleton-post-card">
+          <div class="skeleton-header">
+            <div class="skeleton-avatar"></div>
+            <div class="skeleton-info">
+              <div class="skeleton-name"></div>
+              <div class="skeleton-time"></div>
+            </div>
+          </div>
+          <div class="skeleton-content"></div>
+          <div class="skeleton-content" style="margin-top: 8px; width: 70%;"></div>
+          <div class="skeleton-actions"></div>
+        </div>
       </div>
 
       <el-alert v-if="error" type="error" title="加載錯誤" />
@@ -93,6 +135,14 @@
       plain
       @click="fetchNextPage"
       >載入更多</el-button
+    >
+    <el-button
+      v-if="isFetchingNextPage"
+      class="load-more-btn"
+      loading
+      disabled
+      plain
+      >載入中...</el-button
     >
   </el-col>
 
@@ -442,5 +492,121 @@ const goToUser = (id) => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* 骨架屏樣式 */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton-container {
+  padding: 20px;
+}
+
+.skeleton-post-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-input {
+  flex: 1;
+  height: 36px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-button {
+  width: 80px;
+  height: 36px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-divider {
+  height: 1px;
+  background: rgba(243, 245, 247, 0.15);
+  margin: 10px 0;
+}
+
+.skeleton-post-card {
+  margin-bottom: 20px;
+  padding: 0 0 20px 0;
+  border-bottom: 1px solid rgba(243, 245, 247, 0.15);
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.skeleton-info {
+  flex: 1;
+}
+
+.skeleton-name {
+  width: 120px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  margin-bottom: 8px;
+}
+
+.skeleton-time {
+  width: 80px;
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-content {
+  width: 100%;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.skeleton-actions::before,
+.skeleton-actions::after {
+  content: "";
+  width: 60px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
 }
 </style>
