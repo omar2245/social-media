@@ -14,6 +14,7 @@ const api = axios.create({
 
 let isRefreshing = false;
 let pendingRequests = [];
+let activeRequests = 0;
 let slowRequestTimer;
 let slowRequestMessage = null;
 const getAccessToken = () => localStorage.getItem("access_token");
@@ -52,8 +53,8 @@ api.interceptors.request.use(
 
     // 5秒後顯示超時警告
     // 先清除舊的 timer，避免多重計時器同時存在
-    clearTimeout(slowRequestTimer);
-    slowRequestTimer = setTimeout(() => {
+    activeRequests += 1;
+    if (activeRequests === 1) slowRequestTimer = setTimeout(() => {
       if (!slowRequestMessage) {
         slowRequestMessage = ElMessage({
           message: "伺服器回應較慢，請耐心等待...",
@@ -67,27 +68,44 @@ api.interceptors.request.use(
     return config;
   },
   function (error) {
-    clearTimeout(slowRequestTimer);
+    activeRequests = Math.max(0, activeRequests - 1);
+    clearSlowRequestMessageIfIdle();
     return Promise.reject(error);
   }
 );
 
 // 處理錯誤與自動刷新
+const clearSlowRequestMessageIfIdle = () => {
+  if (activeRequests !== 0) return;
+  clearTimeout(slowRequestTimer);
+  slowRequestTimer = null;
+  if (slowRequestMessage) {
+    slowRequestMessage.close();
+    slowRequestMessage = null;
+  }
+};
+
 api.interceptors.response.use(
   function (response) {
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) {
     clearTimeout(slowRequestTimer);
     if (slowRequestMessage) {
       // 關閉先前的慢速提示
-      ElMessage.closeAll();
+      slowRequestMessage.close();
       slowRequestMessage = null;
+    }
     }
     return response;
   },
   async function (error) {
+    activeRequests = Math.max(0, activeRequests - 1);
+    if (activeRequests === 0) {
     clearTimeout(slowRequestTimer);
     if (slowRequestMessage) {
-      ElMessage.closeAll();
+      slowRequestMessage.close();
       slowRequestMessage = null;
+    }
     }
     const originalRequest = error.config;
     const status = error.response?.status;

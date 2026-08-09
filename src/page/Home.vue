@@ -15,7 +15,7 @@
 
     <div class="posts">
       <!-- 初始加載骨架屏 -->
-      <div v-if="isUserLoading" class="skeleton-container">
+      <div v-if="isPostsPending" class="skeleton-container" aria-busy="true" aria-label="貼文載入中">
         <div class="skeleton-post-btn">
           <div class="skeleton-avatar"></div>
           <div class="skeleton-input"></div>
@@ -140,7 +140,10 @@
         </div>
       </div>
 
-      <el-alert v-if="error" type="error" title="加載錯誤" />
+      <div v-if="!isPostsPending && !error && postsList.length === 0" class="state-box">目前還沒有貼文</div>
+      <el-alert v-if="error" type="error" title="貼文載入失敗" show-icon>
+        <template #default><el-button size="small" @click="refetchPosts">重新載入</el-button></template>
+      </el-alert>
     </div>
     <el-button
       v-if="hasNextPage && !isFetchingNextPage"
@@ -200,7 +203,8 @@
           type="primary"
           :loading="isSubmitting"
           >發佈
-        </el-button>
+    </el-button>
+    <p v-if="!isPostsPending && !error && postsList.length && !hasNextPage" class="feed-end">已經到底了</p>
       </div>
     </template>
   </el-dialog>
@@ -208,7 +212,7 @@
 
 <script setup>
 import { getPosts, createPost, like, dislike } from "../api/post";
-import { computed, ref, reactive } from "vue";
+import { computed, ref, reactive, watch } from "vue";
 import {
   useInfiniteQuery,
   useMutation,
@@ -217,13 +221,24 @@ import {
 } from "@tanstack/vue-query";
 import { getMe } from "../api/user";
 import { ElMessage } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { getColorFromChar } from "../utils/utils";
 
 const router = useRouter();
+const route = useRoute();
 const queryClient = useQueryClient();
 
 const dialogVisible = ref(false);
+watch(
+  () => route.query.compose,
+  (compose) => {
+    if (compose === "1") {
+      dialogVisible.value = true;
+      router.replace({ name: "home", query: {} });
+    }
+  },
+  { immediate: true }
+);
 
 const form = reactive({ content: "", files: [] });
 const isSubmitting = ref(false);
@@ -309,7 +324,7 @@ const logout = () => {
 
 // 貼文分頁查詢
 const limit = 10;
-const { data, fetchNextPage, isFetchingNextPage, hasNextPage, error } =
+const { data, fetchNextPage, isFetchingNextPage, hasNextPage, error, isPending: isPostsPending, refetch: refetchPosts } =
   useInfiniteQuery({
     queryKey: ["posts"],
     queryFn: ({ pageParam = 1 }) => getPosts(pageParam, limit),
@@ -417,13 +432,15 @@ const goToUser = (id) => {
   border-color: rgba(243, 245, 247, 0.15) !important;
 }
 .post-images {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .post-image-wrapper {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  aspect-ratio: 1;
   background-color: white; /* 白底 */
   border-radius: 8px; /* 可選，圓角 */
   overflow: hidden; /* 超出區域隱藏 */
@@ -432,6 +449,7 @@ const goToUser = (id) => {
   align-items: center;
   justify-content: center;
 }
+.post-images .post-image-wrapper:only-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
 
 .post-image {
   width: 100%;
@@ -466,6 +484,7 @@ const goToUser = (id) => {
 .load-more-btn {
   margin-top: 24px;
 }
+.state-box, .feed-end { padding: 24px; text-align: center; color: #b4b4b4; }
 
 .preview-images {
   display: flex;
@@ -621,5 +640,17 @@ const goToUser = (id) => {
   background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%);
   background-size: 1000px 100%;
   animation: shimmer 2s infinite;
+}
+
+@media (max-width: 767px) {
+  .home { margin: 20px 0; align-items: stretch; }
+  .posts, .auth-box { min-width: 0; width: 100%; }
+  .auth-box { align-items: center; gap: 12px; }
+  .post-card { padding: 16px 12px; }
+  .post-btn { padding: 20px 12px 12px; gap: 8px; }
+  .post { min-width: 0; }
+  .post > div:last-child, .post-detail { min-width: 0; flex: 1; }
+  .placeholder { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .skeleton-container { padding: 16px 12px; }
 }
 </style>

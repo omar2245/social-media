@@ -2,6 +2,11 @@
   <div class="search">
     <h2>用戶列表</h2>
     <div class="search-container">
+      <el-skeleton v-if="isLoading" :rows="4" animated class="search-state" aria-busy="true" />
+      <el-alert v-else-if="error" title="使用者載入失敗" type="error" show-icon class="search-state">
+        <template #default><el-button size="small" @click="refetch">重新載入</el-button></template>
+      </el-alert>
+      <p v-else-if="!users?.length" class="search-state">找不到使用者</p>
       <div v-for="user in users" :key="user.id" class="card">
         <div class="card-item">
           <div class="content">
@@ -39,12 +44,13 @@ const {
   data: users,
   isLoading,
   error,
+  refetch,
 } = useQuery({ queryKey: ["users"], queryFn: getUserLists });
 
 function handleClick(userId) {
   router.push({
     name: "profile",
-    params: { userId },
+    params: { id: userId },
   });
 }
 </script>
@@ -97,5 +103,13 @@ function handleClick(userId) {
 }
 .el-divider {
   margin: 0 !important;
+}
+.search-state { margin: 0; padding: 24px; text-align: center; color: #aaa; }
+@media (max-width: 767px) {
+  .search { margin: 20px 0; align-items: stretch; }
+  .search-container { min-width: 0; width: 100%; }
+  .card-item { padding: 16px 12px; gap: 8px; }
+  .content { min-width: 0; }
+  .email { overflow-wrap: anywhere; }
 }
 </style>

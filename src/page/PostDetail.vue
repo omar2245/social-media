@@ -1,5 +1,9 @@
 <template>
   <div class="post-detail">
+    <el-skeleton v-if="isPostPending" :rows="5" animated class="state-card" aria-busy="true" />
+    <el-alert v-else-if="postError" type="error" title="貼文載入失敗" show-icon class="state-card">
+      <template #default><el-button size="small" @click="refetchPost">重新載入</el-button></template>
+    </el-alert>
     <el-card v-if="post">
       <div class="header">
         <el-avatar :src="post?.avatar" v-if="post.avatar" />
@@ -30,7 +34,7 @@
       </div>
 
       <div class="post-actions">
-        <span class="action" @click="onLike(post)">
+        <span class="action" :class="{ disabled: isLiking }" @click="onLike(post)">
           <i
             :class="[post.is_liked ? 'fas fa-heart liked' : 'far fa-heart']"
           ></i>
@@ -59,13 +63,19 @@
         <el-button
           type="primary"
           @click="submitComment"
-          :disabled="!newComment.trim().length"
+          :disabled="!newComment.trim().length || createCommentMutation.isPending.value"
+          :loading="createCommentMutation.isPending.value"
         >
           送出留言
         </el-button>
       </el-form-item>
     </el-form>
 
+    <el-skeleton v-if="areCommentsPending" :rows="3" animated class="state-card" aria-busy="true" />
+    <el-alert v-else-if="commentsError" type="error" title="留言載入失敗" show-icon class="state-card">
+      <template #default><el-button size="small" @click="refetchComments">重新載入</el-button></template>
+    </el-alert>
+    <p v-else-if="comments.length === 0" class="empty-state">還沒有留言，成為第一個留言的人吧。</p>
     <div v-for="comment in comments" :key="comment.id" class="comment">
       <el-card class="comment-card">
         <div class="comment-header">
@@ -109,15 +119,16 @@ const route = useRoute();
 const postId = route.params.id;
 const queryClient = useQueryClient();
 const newComment = ref("");
+const isLiking = ref(false);
 
 // 取得貼文詳情
-const { data: postData } = useQuery({
+const { data: postData, isPending: isPostPending, error: postError, refetch: refetchPost } = useQuery({
   queryKey: ["post", postId],
   queryFn: () => getPostDetail(postId),
 });
 
 // 取得留言清單
-const { data: commentData } = useQuery({
+const { data: commentData, isPending: areCommentsPending, error: commentsError, refetch: refetchComments } = useQuery({
   queryKey: ["post-comments", postId],
   queryFn: () => getPostComments(postId),
 });
@@ -153,6 +164,8 @@ const formatDate = (iso) =>
   });
 
 const onLike = async (post) => {
+  if (isLiking.value) return;
+  isLiking.value = true;
   try {
     if (!post.is_liked) {
       await like(post.id);
@@ -162,7 +175,7 @@ const onLike = async (post) => {
     queryClient.invalidateQueries({ queryKey: ["post", postId] });
   } catch (e) {
     ElMessage({ message: "操作失敗", type: "error" });
-  }
+  } finally { isLiking.value = false; }
 };
 </script>
 
@@ -241,20 +254,24 @@ const onLike = async (post) => {
   align-items: center;
   gap: 6px;
 }
+.action.disabled { pointer-events: none; opacity: 0.55; }
+.state-card, .empty-state { margin: 16px 0; padding: 20px; }
+.empty-state { text-align: center; color: #aaa; }
 
 .fa-heart.liked {
   color: red;
 }
 
 .post-images {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   margin-top: 16px;
 }
 
 .post-image-wrapper {
-  width: 200px;
-  height: 200px;
+  width: 100%;
+  aspect-ratio: 1;
   background-color: white; /* 白底 */
   border-radius: 8px; /* 可選，圓角 */
   overflow: hidden; /* 超出區域隱藏 */
@@ -263,11 +280,21 @@ const onLike = async (post) => {
   align-items: center;
   justify-content: center;
 }
+.post-images .post-image-wrapper:only-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
 
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover; /* 圖片裁切填滿 */
   display: block;
+}
+@media (max-width: 767px) {
+  .post-detail { width: 100%; margin: 20px 0; }
+  .comment-form { min-width: 0; width: 100%; align-items: flex-start; }
+  .comment-form :deep(.el-form-item:first-child) { flex: 1; min-width: 0; }
+  .comment-form .comment-input { min-width: 0; width: 100%; }
+  .comment-header { gap: 8px; }
+  .comment-header .date { flex-shrink: 0; }
+  .comment-content { padding-left: 0; margin-top: 8px; }
 }
 </style>

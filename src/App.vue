@@ -27,6 +27,32 @@ body {
   font-family: "Arial", sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
+body { overflow-x: hidden; }
+
+@media (max-width: 767px) {
+  .home, .profile, .search, .post-detail {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 20px 0 !important;
+  }
+  .posts, .auth-box, .profile-container, .search-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  .profile-container { padding: 20px 16px !important; }
+  .el-dialog { width: calc(100vw - 32px) !important; max-height: 80dvh; }
+  .el-dialog__body { max-height: calc(80dvh - 120px); overflow-y: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 .el-card {
   background-color: #2e2e2e; /* 卡片背景色 */
   color: white; /* 卡片中文字顏色 */
