@@ -8,10 +8,6 @@
         <span class="nav-label">首頁</span>
         <!-- 房子圖案 -->
       </el-menu-item>
-      <el-menu-item index="search" @click="navigate('search')">
-        <el-icon class="icon" :size="60"><Search /></el-icon>
-        <span class="nav-label">搜尋</span>
-      </el-menu-item>
       <el-menu-item index="compose" @click="navigate('compose')">
         <el-icon class="icon" :size="60"><CirclePlus /></el-icon>
         <span class="nav-label">發文</span>
@@ -32,7 +28,6 @@ import {
   Avatar,
   HomeFilled,
   Menu as IconMenu,
-  Search,
   CirclePlus,
 } from "@element-plus/icons-vue";
 import { getMe } from "../api/user";
@@ -104,7 +99,7 @@ const navigate = async (name) => {
   .menu {
     height: 64px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0;
   }
   .el-menu-item {
